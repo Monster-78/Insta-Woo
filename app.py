@@ -4,7 +4,7 @@ import json
 import time
 import threading
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 from flask import Flask, request, jsonify
 import requests
 
@@ -23,7 +23,7 @@ DAILY_POST_LIMIT = int(os.getenv("DAILY_POST_LIMIT","10"))
 MIN_MINUTES_BETWEEN_POSTS = int(os.getenv("MIN_MINUTES_BETWEEN_POSTS","30"))
 USE_CAROUSEL = env_bool("USE_CAROUSEL", True)
 CAROUSEL_MAX_ITEMS = max(1,min(10,int(os.getenv("CAROUSEL_MAX_ITEMS","10"))))
-DB_PATH = os.getenv("DB_PATH","/tmp/data.sqlite3")
+DB_PATH = os.getenv("DB_PATH","data.sqlite3")  # Persistent path
 GRAPH_BASE = "https://graph.facebook.com/v21.0"
 
 # ------------------------ Flask / DB ------------------------
@@ -178,22 +178,24 @@ def verify():
         return challenge, 200
     return "Verification failed", 403
 
-    
 @app.route("/wc-webhook", methods=["POST"])
 def wc_webhook():
-    data = request.get_json(force=True, silent=True) or {}
-    name = data.get("name") or "New Product"
-    price = data.get("price") or ""
-    link = data.get("permalink") or ""
-    images = []
-    imgs = data.get("images") or []
-    if isinstance(imgs, list):
-        for it in imgs:
-            if isinstance(it, dict) and it.get("src"):
-                images.append(it["src"])
-    enqueue_item(name, price, link, images)
-    # Instant response
-    return jsonify({"status": "queued"}), 200
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+        name = data.get("name") or "New Product"
+        price = data.get("price") or ""
+        link = data.get("permalink") or ""
+        images = []
+        imgs = data.get("images") or []
+        if isinstance(imgs, list):
+            for it in imgs:
+                if isinstance(it, dict) and it.get("src"):
+                    images.append(it["src"])
+        enqueue_item(name, price, link, images)
+        # Instant response for WooCommerce
+        return jsonify({"status": "queued"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ------------------------ Main ------------------------
 if __name__=="__main__":
