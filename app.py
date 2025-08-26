@@ -183,7 +183,7 @@ def verify():
 def wc_webhook():
     data = request.get_json(force=True, silent=True) or {}
     name = data.get("name") or "New Product"
-    price = str(data.get("price") or "")
+    price = data.get("price") or ""
     link = data.get("permalink") or ""
     images = []
     imgs = data.get("images") or []
@@ -192,7 +192,8 @@ def wc_webhook():
             if isinstance(it, dict) and it.get("src"):
                 images.append(it["src"])
     enqueue_item(name, price, link, images)
-    return jsonify({"status":"queued","name":name,"images":len(images)})
+    # Instant response
+    return jsonify({"status": "queued"}), 200
 
 # ------------------------ Main ------------------------
 if __name__=="__main__":
