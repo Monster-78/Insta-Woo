@@ -52,8 +52,8 @@ def env_bool(key: str, default: bool) -> bool:
     return str(val).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 PORT = int(os.getenv("PORT", "8000"))
-IG_USER_ID = os.getenv("IG_USER_ID", "")
-IG_TOKEN = os.getenv("IG_TOKEN", "")
+IG_USER_ID = os.getenv("1497990968063965", "")
+IG_TOKEN = os.getenv("EAAUITQVbWnMBPSgm35erDUi1ap0U8tvqE3rYYALeProTuZCcJEZApXAePMhkeJ8ZBa6rVUsXq544HbCLLKR65ki8GAFt9adTyRWFqhlL9WiGA9wqSOsPdsOIYFdby0qgIiZBJI0bXAKimeyAZBkRGbNdd34XtLeWZBty7EUpQPvBDMdvTwM8NLUI4DjlJ3ViGoZBPyfQXBwGuBY6CN8", "")
 DAILY_POST_LIMIT = int(os.getenv("DAILY_POST_LIMIT", "10"))
 MIN_MINUTES_BETWEEN_POSTS = int(os.getenv("MIN_MINUTES_BETWEEN_POSTS", "30"))
 USE_CAROUSEL = env_bool("USE_CAROUSEL", True)
@@ -480,8 +480,29 @@ def wc_webhook():
 
 # ------------------------ Main ------------------------
 
+from flask import Flask, request
+
+app = Flask(__name__)
+
+# Test Route
+@app.route("/", methods=["GET"])
+def home():
+    return "Server is running successfully!"
+
+# Webhook Verification Route
+@app.route("/webhook", methods=["GET"])
+def verify():
+    verify_token = "my_verify_token"   # apna verify token yaha daalo
+    mode = request.args.get("hub.mode")
+    token = request.args.get("hub.verify_token")
+    challenge = request.args.get("hub.challenge")
+
+    if mode == "subscribe" and token == verify_token:
+        return challenge, 200
+    else:
+        return "Verification failed", 403
+
+
 if __name__ == "__main__":
-    init_db()
-    t = threading.Thread(target=worker_loop, daemon=True)
-    t.start()
-    app.run(host="0.0.0.0", port=PORT)
+    app.run(host="0.0.0.0", port=3000)
+
