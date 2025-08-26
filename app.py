@@ -15,7 +15,7 @@ def env_bool(key: str, default: bool) -> bool:
     if val is None: return default
     return str(val).strip().lower() in {"1","true","yes","y","on"}
 
-PORT = int(os.getenv("PORT","8000"))
+PORT = int(os.getenv("PORT","3000"))
 IG_USER_ID = os.getenv("IG_USER_ID","1497990968063965")   # Instagram Business ID
 IG_TOKEN = os.getenv("IG_TOKEN","EAAUITQVbWnMBPSgm35erDUi1ap0U8tvqE3rYYALeProTuZCcJEZApXAePMhkeJ8ZBa6rVUsXq544HbCLLKR65ki8GAFt9adTyRWFqhlL9WiGA9wqSOsPdsOIYFdby0qgIiZBJI0bXAKimeyAZBkRGbNdd34XtLeWZBty7EUpQPvBDMdvTwM8NLUI4DjlJ3ViGoZBPyfQXBwGuBY6CN8")  # Long-lived Token
 
