@@ -171,13 +171,16 @@ def home():
 
 @app.route("/webhook", methods=["GET"])
 def verify():
+try:
     mode = request.args.get("hub.mode")
     token = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
     if mode=="subscribe" and token==VERIFY_TOKEN:
         return challenge, 200
     return "Verification failed", 403
-
+except Exception as e:
+        return f"Error: {str(e)}", 500
+    
 @app.route("/wc-webhook", methods=["POST"])
 def wc_webhook():
     data = request.get_json(force=True, silent=True) or {}
