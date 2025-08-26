@@ -16,14 +16,14 @@ def env_bool(key, default=True):
     return str(val).strip().lower() in {"1","true","yes","y","on"}
 
 PORT = int(os.getenv("PORT", "8000"))
-IG_USER_ID = os.getenv("IG_USER_ID", "")  # Instagram Business ID
-IG_TOKEN = os.getenv("IG_TOKEN", "")      # Long-lived Instagram token
-VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "my_verify_token")
-DAILY_POST_LIMIT = int(os.getenv("DAILY_POST_LIMIT", "10"))
-MIN_MINUTES_BETWEEN_POSTS = int(os.getenv("MIN_MINUTES_BETWEEN_POSTS", "30"))
+IG_USER_ID = os.getenv("IG_USER_ID","")       # Instagram Business ID
+IG_TOKEN = os.getenv("IG_TOKEN","")           # Long-lived Instagram token
+VERIFY_TOKEN = os.getenv("VERIFY_TOKEN","my_verify_token")
+DAILY_POST_LIMIT = int(os.getenv("DAILY_POST_LIMIT","10"))
+MIN_MINUTES_BETWEEN_POSTS = int(os.getenv("MIN_MINUTES_BETWEEN_POSTS","30"))
 USE_CAROUSEL = env_bool("USE_CAROUSEL", True)
 CAROUSEL_MAX_ITEMS = max(1,min(10,int(os.getenv("CAROUSEL_MAX_ITEMS","10"))))
-DB_PATH = os.getenv("DB_PATH", "data.sqlite3")  # Persistent in project folder
+DB_PATH = os.getenv("DB_PATH","data.sqlite3")  # persistent DB in project folder
 GRAPH_BASE = "https://graph.facebook.com/v21.0"
 
 # ------------------------ Flask / DB ------------------------
@@ -56,13 +56,12 @@ def db():
     return conn
 
 def init_db():
-    print(f"[INFO] Initializing DB at {DB_PATH}")
     with _db_lock:
         conn = db()
         conn.executescript(SCHEMA)
         conn.commit()
         conn.close()
-    print("[INFO] Database initialized successfully!")
+        print("[INFO] Database initialized successfully.")
 
 # ------------------------ Queue ------------------------
 def enqueue_item(name, price, link, images):
@@ -74,7 +73,7 @@ def enqueue_item(name, price, link, images):
         )
         conn.commit()
         conn.close()
-    print(f"[QUEUE] Item enqueued: {name}")
+        print(f"[INFO] Enqueued item: {name}")
 
 def fetch_next_batch(max_items=1):
     with _db_lock:
@@ -96,7 +95,7 @@ def mark_items(ids, status, error=None):
             )
         conn.commit()
         conn.close()
-    print(f"[QUEUE] Marked items {ids} as {status} {error if error else ''}")
+        print(f"[INFO] Marked items {ids} as {status}")
 
 # ------------------------ Instagram Posting ------------------------
 class IGError(Exception): pass
@@ -121,10 +120,8 @@ def publish_item(item):
         ig_post(f"{GRAPH_BASE}/{IG_USER_ID}/media_publish",
                 {"creation_id": creation["id"], "access_token": IG_TOKEN})
         mark_items([item["id"]], "posted")
-        print(f"[IG] Posted item: {item['name']}")
     except Exception as e:
         mark_items([item["id"]], "error", str(e))
-        print(f"[IG] Error posting item {item['name']}: {e}")
 
 # ------------------------ Worker ------------------------
 def posts_today():
@@ -201,7 +198,8 @@ def wc_webhook():
 
 # ------------------------ Main ------------------------
 if __name__=="__main__":
+    print(f"[INFO] Starting server with DB: {DB_PATH}")
     init_db()
     t = threading.Thread(target=worker_loop, daemon=True)
     t.start()
-    app.run(host="0.0.0.0", port=PORT)
+    app.run(host="0.0.0.0", port=PORT, debug=True)
