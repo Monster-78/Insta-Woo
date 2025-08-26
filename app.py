@@ -23,7 +23,7 @@ DAILY_POST_LIMIT = int(os.getenv("DAILY_POST_LIMIT","10"))
 MIN_MINUTES_BETWEEN_POSTS = int(os.getenv("MIN_MINUTES_BETWEEN_POSTS","30"))
 USE_CAROUSEL = env_bool("USE_CAROUSEL", True)
 CAROUSEL_MAX_ITEMS = max(1,min(10,int(os.getenv("CAROUSEL_MAX_ITEMS","10"))))
-DB_PATH = os.getenv("DB_PATH","data.sqlite3")
+DB_PATH = os.getenv("DB_PATH","/tmp/data.sqlite3")
 GRAPH_BASE = "https://graph.facebook.com/v21.0"
 
 # ------------------------ Flask / DB ------------------------
